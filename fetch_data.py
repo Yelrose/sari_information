@@ -113,4 +113,4 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     data = GdData()
-    print(data.view_city(args.city))
+    print(data.view_city(args.city).to_string(index=False))
