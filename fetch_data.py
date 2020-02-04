@@ -6,6 +6,9 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from bs4 import BeautifulSoup
 import datetime
+import argparse
+import numpy as np
+from collections import defaultdict
 
 class GdData(object):
     """DataFetcher for Guangdong Province
@@ -43,14 +46,18 @@ class GdData(object):
 
     def fetch_daily_pages(self, url_list):
         citys = []
-        confirmeds = []
+        delta_confirmeds = []
         dates = []
+        city_confirmeds = defaultdict(lambda : 0)
+        confirmeds = []
         for url, date in url_list[::-1]:
-            for city, confirmed in self.fetch_daily_page(url):
+            for city, delta_confirmed in self.fetch_daily_page(url):
                 citys.append(city)
-                confirmeds.append(confirmed)
+                delta_confirmeds.append(delta_confirmed)
+                city_confirmeds[city] += delta_confirmed
+                confirmeds.append(city_confirmeds[city])
                 dates.append(date)
-        data_frame = pd.DataFrame(data={"city": citys, "confrimed": confirmeds, "date": dates})
+        data_frame = pd.DataFrame(data={"city": citys, "confirmed": confirmeds, "delta_confrimed": delta_confirmeds, "date": dates})
         return data_frame
 
     def fetch_daily_page(self, url):
@@ -66,9 +73,14 @@ class GdData(object):
                     city_confirmed.append((city, confirmed))
         return city_confirmed
 
-    def city(self, city):
+    def view_city(self, city):
         return self.data_frame[self.data_frame.city == city]
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Estimate R0 2019-ncov')
+    parser.add_argument('--city', type=str, default="广州",
+                        help='input a city in Guangdong Province')
+    args = parser.parse_args()
+
     data = GdData()
-    print(data.city("广州"))
+    print(data.view_city(args.city))
