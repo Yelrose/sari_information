@@ -82,7 +82,7 @@ class GdData(object):
 
     def fetch_daily_page(self, url):
         html = requests.get(url)
-        soup = BeautifulSoup(html.text)
+        soup = BeautifulSoup(html.text, features="html.parser")
         city_confirmed = defaultdict(lambda : 0)
         mode = ""
         for p in soup.find_all("p"):
